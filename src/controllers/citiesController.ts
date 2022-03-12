@@ -10,6 +10,9 @@ export async function citiesSuggestion(req: Request, res: Response) {
       citiesSuggestionJsonInput.latitude &&
       citiesSuggestionJsonInput.longitude
     ) {
+      if (!citiesSuggestionJsonInput.radius) {
+        citiesSuggestionJsonInput.radius = 10;
+      }
       const suggestionsOutput = await citiesSuggestionWithLatitudeAndLongitude(
         citiesSuggestionJsonInput,
       );
