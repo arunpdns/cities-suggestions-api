@@ -13,9 +13,9 @@ export async function migrateToMongo(): Promise<void> {
   const result = new TsvParser().parse(data);
   const cities = result
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .filter((element:any) => element.long && element.lat)
+    .filter((element: any) => element.long && element.lat)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .map((element:any) => {
+    .map((element: any) => {
       return {
         name: element.name,
         country: element.country,

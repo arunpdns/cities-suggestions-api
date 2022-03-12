@@ -43,7 +43,7 @@ describe('API testing', () => {
       .catch((err) => {
         throw err;
       });
-    expect(response.body).toHaveLength(2);
+    expect(response.body.suggestions).toHaveLength(2);
   });
 
   test('get suggestions will return no matching documents', async () => {
@@ -59,7 +59,7 @@ describe('API testing', () => {
       .catch((err) => {
         throw err;
       });
-    expect(response.body).toHaveLength(0);
+    expect(response.body.suggestions).toHaveLength(0);
   });
 
   test('request without q will fail', async () => {
@@ -158,6 +158,44 @@ describe('API testing', () => {
     expect(response.body).toHaveProperty(
       'message',
       'Failed to validate input "sort" must be one of [name, distance]',
+    );
+  });
+
+  test('request with no value for latitude and value for sort other than name will fail', async () => {
+    const response = await request(app)
+      .get('/api/cities/suggestions')
+      .query({
+        q: 'lon',
+        longitude: -79.4163,
+        radius: 500,
+        sort: 'distance',
+      })
+      .catch((err) => {
+        throw err;
+      });
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty(
+      'message',
+      'Failed to validate input "sort" must be [name]',
+    );
+  });
+
+  test('request with no value for longitude and value for sort other than name will fail', async () => {
+    const response = await request(app)
+      .get('/api/cities/suggestions')
+      .query({
+        q: 'lon',
+        latitude: -79.4163,
+        radius: 500,
+        sort: 'distance',
+      })
+      .catch((err) => {
+        throw err;
+      });
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty(
+      'message',
+      'Failed to validate input "sort" must be [name]',
     );
   });
 });
