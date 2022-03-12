@@ -1,6 +1,4 @@
 import { CitiesSuggestionJsonInput } from './../dto/citiesSuggestionJsonInput';
-import { CitiesSuggestionJsonOutput } from './../dto/citiesSuggestionJsonOutput';
-import { CitiesSuggestionJsonOutputWithoutDistance } from './../dto/citiesSuggestionJsonOutputWithoutDistance';
 import City from '../models/cities';
 
 export async function citiesSuggestionWithLatitudeAndLongitude(
@@ -8,57 +6,101 @@ export async function citiesSuggestionWithLatitudeAndLongitude(
 ) {
   const { q, longitude, latitude, radius, sort }: CitiesSuggestionJsonInput =
     data;
-  const result = await City.aggregate([
+  const suggestionOutput = await City.aggregate([
     {
       $geoNear: {
         near: {
           type: 'Point',
           coordinates: [Number(longitude), Number(latitude)],
         },
-        distanceField: 'distance',
-        maxDistance: Number(radius) * 1000,
-        query: { name: { $regex: q, $options: 'i' } },
+        distanceField: 'dist.calculated',
+        maxDistance: radius * 1000,
+        query: { name: new RegExp(q, 'i') },
         includeLocs: 'dist.location',
         spherical: true,
       },
     },
     {
-      $sort: {
-        [sort]: 1,
+      $addFields: { distance: { $divide: ['$dist.calculated', 1000] } },
+    },
+    {
+      $addFields: {
+        latitude: { $toDouble: { $arrayElemAt: ['$location.coordinates', 1] } },
       },
     },
-  ]);
-  const suggestionsArray: Array<CitiesSuggestionJsonOutput> = result.map(
-    (element) => {
-      const suggestionsObject: CitiesSuggestionJsonOutput = {
-        name: `${element.name}, ${element.state}, ${element.country}`,
-        latitude: element.location.coordinates[1],
-        longitude: element.location.coordinates[0],
-        distance: element.distance / 1000,
-      };
-      return suggestionsObject;
+    {
+      $addFields: {
+        longitude: {
+          $toDouble: { $arrayElemAt: ['$location.coordinates', 0] },
+        },
+      },
     },
-  );
-  const suggestionsOutput = { suggestions: suggestionsArray };
-  return suggestionsOutput;
+    {
+      $addFields: {
+        name: {
+          $concat: ['$name', ',', '$state', ',', '$country'],
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        latitude: 1,
+        longitude: 1,
+        distance: 1,
+      },
+    },
+    {
+      $sort: { [sort]: 1 },
+    },
+  ]);
+  const suggestionsFinalOutput = { suggestions: suggestionOutput };
+  return suggestionsFinalOutput;
 }
 
 export async function citiesSuggestionWitoutLatitudeAndLongitude(
   data: CitiesSuggestionJsonInput,
 ) {
   const { q, sort }: CitiesSuggestionJsonInput = data;
-  const result = await City.find({ name: { $regex: q, $options: 'i' } }).sort({
-    [sort]: 1,
-  });
-  const suggestionsArray: Array<CitiesSuggestionJsonOutputWithoutDistance> =
-    result.map((element) => {
-      const suggestionsObject: CitiesSuggestionJsonOutputWithoutDistance = {
-        name: `${element.name}, ${element.state}, ${element.country}`,
-        latitude: element.location.coordinates[1],
-        longitude: element.location.coordinates[0],
-      };
-      return suggestionsObject;
-    });
-  const suggestionsOutput = { suggestions: suggestionsArray };
-  return suggestionsOutput;
+  const suggestionOutput = await City.aggregate([
+    {
+      $addFields: {
+        latitude: { $toDouble: { $arrayElemAt: ['$location.coordinates', 1] } },
+      },
+    },
+    {
+      $addFields: {
+        longitude: {
+          $toDouble: { $arrayElemAt: ['$location.coordinates', 0] },
+        },
+      },
+    },
+    {
+      $addFields: {
+        name: {
+          $concat: ['$name', ',', '$state', ',', '$country'],
+        },
+      },
+    },
+    {
+      $match: {
+        name: new RegExp(q, 'i'),
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        latitude: 1,
+        longitude: 1,
+      },
+    },
+    {
+      $sort: { [sort]: 1 },
+    },
+  ]);
+
+  const suggestionsFinalOutput = { suggestions: suggestionOutput };
+  return suggestionsFinalOutput;
 }
