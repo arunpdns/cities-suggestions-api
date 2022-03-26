@@ -8,6 +8,7 @@
   "devDependencies": {
     "@types/jest": "~27.0.2",
     "@types/node": "~16.11.6",
+    "@types/sinon": "^10.0.11",
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "~5.7.0",
     "@typescript-eslint/parser": "~5.7.0",
@@ -30,7 +31,7 @@
     "build": "tsc -p tsconfig.release.json",
     "build:watch": "tsc -w -p tsconfig.release.json",
     "lint": "eslint . --ext .ts,.tsx",
-    "test": "jest --verbose --detectOpenHandles"
+    "test": "tsc -p tsconfig.release.json && jest --verbose "
   },
   "author": "Deepnetsoft",
   "license": "Apache-2.0",
@@ -43,15 +44,12 @@
     "http-status-codes": "^2.2.0",
     "joi": "^17.6.0",
     "lodash": "^4.17.21",
-    "mockgoose": "^8.0.4",
     "mongodb-memory-server": "^8.4.0",
     "mongoose": "^6.2.5",
     "morgan": "^1.10.0",
+    "sinon": "^13.0.1",
     "supertest": "^6.2.2",
     "tslib": "~2.3.1",
     "winston": "^3.6.0"
-  },
-  "volta": {
-    "node": "16.13.0"
   }
 }

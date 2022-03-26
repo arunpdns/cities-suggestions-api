@@ -21,22 +21,12 @@ export async function citiesSuggestionWithLatitudeAndLongitude(
       },
     },
     {
-      $addFields: { distance: { $divide: ['$dist.calculated', 1000] } },
-    },
-    {
       $addFields: {
+        distance: { $divide: ['$dist.calculated', 1000] },
         latitude: { $toDouble: { $arrayElemAt: ['$location.coordinates', 1] } },
-      },
-    },
-    {
-      $addFields: {
         longitude: {
           $toDouble: { $arrayElemAt: ['$location.coordinates', 0] },
         },
-      },
-    },
-    {
-      $addFields: {
         name: {
           $concat: ['$name', ',', '$state', ',', '$country'],
         },
