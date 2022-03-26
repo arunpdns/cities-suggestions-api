@@ -1,8 +1,8 @@
 import initMongoServer from './helpers/initMongoServer';
 import seedDb from './helpers/seedDb';
 import request from 'supertest';
-let app:any;
-let api:any;
+let app;
+let api;
 beforeAll(async () => {
   /* eslint-disable  @typescript-eslint/no-var-requires */
   app = require('../src/server').default;

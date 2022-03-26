@@ -31,6 +31,7 @@
     "build": "tsc -p tsconfig.release.json",
     "build:watch": "tsc -w -p tsconfig.release.json",
     "lint": "eslint . --ext .ts,.tsx",
+    "pretest":"npm run lint",
     "test": "tsc -p tsconfig.release.json && jest --verbose "
   },
   "author": "Deepnetsoft",

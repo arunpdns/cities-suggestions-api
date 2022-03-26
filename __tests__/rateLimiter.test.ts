@@ -2,9 +2,9 @@ import initMongoServer from './helpers/initMongoServer';
 import seedDb from './helpers/seedDb';
 import request from 'supertest';
 import sinon from 'sinon';
-let app:any;
-let clock:any;
-let api:any;
+let app;
+let clock;
+let api;
 beforeAll(async () => {
   clock = sinon.useFakeTimers(new Date().getTime());
   /* eslint-disable  @typescript-eslint/no-var-requires */
